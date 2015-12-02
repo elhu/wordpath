@@ -11,13 +11,7 @@ word_file = "/usr/share/dict/words"
 raise "#{@start} and #{@finish} must be the same length" if @start.length != @finish.length
 length = @start.length
 
-
-@words = Set.new
-
-File.readlines(word_file).each do |line|
-  word = line.chomp.downcase
-  @words << word if word.length == length
-end
+@words = Set.new(File.readlines(word_file).select { |word| word.length == length + 1 }.map(&:chomp).map(&:downcase))
 
 raise "Either #{@start} or #{@finish} is not in the dictionary" unless @words.include?(@start) && @words.include?(@finish)
 
