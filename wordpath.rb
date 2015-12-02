@@ -32,14 +32,12 @@ LETTERS = ('a'..'z').to_a.freeze
 def generate_permutations(word, pos)
   word = word.dup
   original = word[pos]
-  letters = LETTERS.dup
-  letters.map! do |letter|
+  LETTERS.map do |letter|
     word[pos] = letter
-    next if letter == original || !@words.include?(word) || @visited.include?(word)
+    next if letter == original || !@words.include?(word)
+    @words.delete(word)
     word.dup
-  end
-  letters.compact!
-  letters
+  end.compact
 end
 
 def nearby_words(word)
@@ -52,19 +50,17 @@ end
 
 def process_queue(queue)
   new_queue = []
-  permutations_added = 0
   queue.each do |word_node|
     return word_node if word_node.name == @finish
     @visited << word_node.name
     nearish = nearby_words(word_node.name).to_a
     nearish.each do |near|
-      permutations_added += 1
       near_node = Tree::TreeNode.new(near)
       word_node << near_node
       new_queue << near_node
     end
   end
-  raise "Can't find path" if permutations_added == 0
+  raise "Can't find path" if new_queue.length == 0
   process_queue(new_queue)
 end
 
