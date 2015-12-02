@@ -1,12 +1,10 @@
 require 'set'
 require 'pp'
 require 'tree'
-# require 'ruby-prof'
 
 word_file = "/usr/share/dict/words"
 
-@start = ARGV[0]
-@finish = ARGV[1]
+@start, @finish = ARGV
 
 raise "#{@start} and #{@finish} must be the same length" if @start.length != @finish.length
 length = @start.length
@@ -15,20 +13,14 @@ length = @start.length
 
 raise "Either #{@start} or #{@finish} is not in the dictionary" unless @words.include?(@start) && @words.include?(@finish)
 
-current_path = []
-@visited = Set.new
-queue = []
-
-queue << Tree::TreeNode.new(@start)
-
 LETTERS = ('a'..'z').to_a.freeze
 
 def generate_permutations(word, pos)
   word = word.dup
   original = word[pos]
-  LETTERS.map do |letter|
+  (LETTERS - [original]).map do |letter|
     word[pos] = letter
-    next if letter == original || !@words.include?(word)
+    next if !@words.include?(word)
     @words.delete(word)
     word.dup
   end.compact
@@ -58,12 +50,12 @@ def process_queue(queue)
   process_queue(new_queue)
 end
 
-# RubyProf.start
-res = process_queue(queue)
+@visited = Set.new
 
-# result = RubyProf.stop
-# printer = RubyProf::FlatPrinter.new(result)
-# printer.print(STDOUT)
+queue = []
+queue << Tree::TreeNode.new(@start)
+
+res = process_queue(queue)
 
 ancestry = []
 ancestry << res.name
@@ -72,4 +64,4 @@ until res.isRoot?
   res = res.parent
   ancestry.unshift(res.name)
 end
-puts ancestry
+puts ancestry.join(' -> ')
